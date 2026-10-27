@@ -72,3 +72,4 @@ See [the eight-app research and implementation report](docs/HEALTH_APP_RESEARCH.
 
 
 Both demo clients now have **five months of varied synthetic data (3,802 entries)**, including water/sleep, meals, workouts, measurements, goals, plan history and consultations. [Dataset details and safe seed command](docs/REALISTIC_DEMO_DATA.md). Existing demo credentials are unchanged.
+# Helth-tracking-System-ADCW-02
