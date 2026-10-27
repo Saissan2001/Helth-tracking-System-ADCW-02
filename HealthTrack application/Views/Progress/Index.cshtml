@@ -1,0 +1,4 @@
+@model ProgressReport
+@{ ViewData["Title"] = "Progress"; ViewData["From"] = Model.From; ViewData["To"] = Model.To; }
+<div class="page-heading"><div><span class="eyebrow">CONSISTENCY TELLS A STORY</span><h1>@Model.Name's progress</h1><p>Your recorded activity and measurements, at a glance.</p></div></div>
+<section class="panel"><partial name="_DateFilter" /><a class="btn btn-outline-secondary" asp-action="Export" asp-route-clientId="@Model.ClientId" asp-route-from="@Model.From.ToString("yyyy-MM-dd")" asp-route-to="@Model.To.ToString("yyyy-MM-dd")">Download progress CSV</a></section><partial name="~/Views/Shared/_Progress.cshtml" model="Model" />

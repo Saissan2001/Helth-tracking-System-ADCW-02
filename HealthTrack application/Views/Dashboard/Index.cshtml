@@ -1,0 +1,75 @@
+@model DashboardData
+@{
+    ViewData["Title"] = "Home";
+    var client = Model.Profile.Role == Roles.Client;
+    var trainer = Model.Profile.Role == Roles.Trainer;
+    var p = Model.Progress;
+    var today = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTimeOffset.UtcNow, Model.Profile.TimeZoneId);
+}
+<div class="page-heading">
+    <div><h1>@(client ? "Your health overview" : trainer ? "Your coaching overview" : "Workspace overview")</h1><p>Welcome back, @Model.Profile.DisplayName.Split(' ')[0]. Here's what's happening today.</p></div>
+    <div class="page-actions"><span class="date-chip"><img src="~/lib/admin-icons/calendar3.svg" alt="" />@today.ToString("dd MMM yyyy")</span><a class="btn btn-primary" href="@(client ? "/Logs/Edit?kind=Workout" : trainer ? "/Trainer/Clients" : "/Admin/Users")">@(client ? "Log activity" : trainer ? "View clients" : "Manage people")</a></div>
+</div>
+@if (client && Model.Daily != null) { <partial name="_TodayOverview" model="Model.Daily" /> }
+<div class="metrics-caption"><h2>@(client ? "Health summary" : "At a glance")</h2><span>@(client ? "Last 30 days" : "Current workspace totals")</span></div>
+@if (client) {
+    <details class="history-section"><summary>Your 30-day overview and care team</summary>
+    <div class="stats-grid">
+        <article class="stat"><label>Latest weight</label><strong>@Display.Number(Model.LatestWeight?.Weight) <em>kg</em></strong><small>@(Model.LatestWeight == null ? "No weight recorded" : TimeZoneInfo.ConvertTimeBySystemTimeZoneId(Model.LatestWeight.At, Model.Profile.TimeZoneId).ToString("dd MMM yyyy"))</small></article>
+        <article class="stat"><label>Body mass index</label><strong>@Display.Number(Model.LatestWeight?.Bmi)</strong><small>Based on your recorded height</small></article>
+        <article class="stat"><label>Workout sessions</label><strong>@p?.WorkoutCount</strong><small>@p?.WorkoutMinutes total minutes</small></article>
+        <article class="stat"><label>Calories burned</label><strong>@Display.Number(p?.Burned) <em>kcal</em></strong><small>Self-reported activity</small></article>
+    </div>
+    <div class="stats-grid"><article class="stat"><label>Workouts this week</label><strong>@Model.WeekWorkouts</strong><small>Since Monday @Model.WeekStarting.ToString("dd MMM")</small></article><article class="stat"><label>Minutes this week</label><strong>@Model.WeekMinutes</strong><small>Recorded workout duration</small></article><article class="stat"><label>Workouts · last 7 days</label><strong>@Model.SevenDayWorkouts</strong><small>Includes today in your timezone</small></article><article class="stat"><label>Minutes · last 7 days</label><strong>@Model.SevenDayMinutes</strong><small>Recorded workout duration</small></article></div>
+    <div class="dashboard-columns">
+        <section class="panel"><div class="panel-heading"><h2>Weight over time</h2><a href="/Progress">View analytics</a></div>
+            @if (p?.WeightPoints.Count > 0) {
+                <div class="chart-wrap"><canvas class="weight-chart" data-points="@System.Text.Json.JsonSerializer.Serialize(p.WeightPoints)" role="img" aria-label="Weight measurements in kilograms over the last 30 days"></canvas></div>
+                <p class="muted small">@p.WeightPoints.Count measurements · <a href="/Progress">View data table</a></p>
+            } else { <div class="empty"><img class="empty-icon" src="~/lib/admin-icons/graph-up.svg" alt="" /><h3>Track your progress over time</h3><p>Record a measurement to start your weight chart.</p><a class="btn btn-outline-secondary" href="/Logs/Edit?kind=Measurement">Add measurement</a></div> }
+        </section>
+        <section class="panel quick-panel"><div class="panel-heading"><h2>Quick actions</h2></div>
+            <a class="quick-link" href="/Logs/Edit?kind=Workout"><img src="~/lib/admin-icons/activity.svg" alt="" /><div><strong>Log a workout</strong><small>Duration, activity and calories</small></div><img class="action-arrow" src="~/lib/admin-icons/chevron-right.svg" alt="" /></a>
+            <a class="quick-link" href="/Logs/Edit?kind=Meal"><img src="~/lib/admin-icons/basket2.svg" alt="" /><div><strong>Record a meal</strong><small>Keep your nutrition log up to date</small></div><img class="action-arrow" src="~/lib/admin-icons/chevron-right.svg" alt="" /></a>
+            <a class="quick-link" href="/Logs/Edit?kind=Measurement"><img src="~/lib/admin-icons/heart-pulse.svg" alt="" /><div><strong>Add a measurement</strong><small>Update your weight and height</small></div><img class="action-arrow" src="~/lib/admin-icons/chevron-right.svg" alt="" /></a>
+            <a class="quick-link" href="/Appointments/Create"><img src="~/lib/admin-icons/calendar3.svg" alt="" /><div><strong>Book an appointment</strong><small>Connect with your care team</small></div><img class="action-arrow" src="~/lib/admin-icons/chevron-right.svg" alt="" /></a>
+        </section>
+    </div>
+    <div class="dashboard-columns">
+        <section class="panel"><div class="panel-heading"><h2>Current plans</h2><a href="/Plans">View all</a></div>
+            @if (Model.CurrentPlans.Count == 0) { <div class="empty compact"><p>Your trainer's published workout and diet plans will appear here.</p></div> }
+            @foreach (var plan in Model.CurrentPlans) { <a class="plan-summary" href="/Plans/Details/@plan.Id"><img src="~/lib/admin-icons/@(plan.Kind == PlanKind.Workout ? "activity" : "basket2").svg" alt="" /><div><small>@plan.Kind · @plan.Items.Count scheduled items</small><strong>@plan.Title</strong><span>@plan.StartDate.ToString("dd MMM") – @plan.EndDate.ToString("dd MMM")</span></div><img src="~/lib/admin-icons/chevron-right.svg" alt="" /></a> }
+        </section>
+        <section class="panel"><div class="panel-heading"><h2>Trainer feedback</h2><span class="pill">Latest notes</span></div>
+            @if (Model.Feedback.Count == 0) { <div class="empty compact"><p>Feedback from your assigned trainer will appear here.</p></div> }
+            @foreach (var feedback in Model.Feedback) { <blockquote>@feedback.Comment<small>@Display.Local(feedback.CreatedAtUtc, Model.Profile.TimeZoneId)</small></blockquote> }
+        </section>
+    </div>
+    </details>
+} else {
+    <div class="stats-grid">
+        <article class="stat"><label>@(trainer ? "Assigned clients" : "Active clients")</label><strong>@Model.Clients</strong><small>@(trainer ? "Currently under your care" : "Across your workspace")</small></article>
+        <article class="stat"><label>Published plans</label><strong>@Model.Plans</strong><small>Workout and nutrition plans</small></article>
+        <article class="stat"><label>Pending appointments</label><strong>@Model.PendingBookings</strong><small>Requests awaiting review</small></article>
+        <article class="stat"><label>Unread notifications</label><strong>@Model.Unread</strong><small><a href="/Notifications">View notifications</a></small></article>
+    </div>
+    <section class="workspace-guide"><img src="~/lib/admin-icons/calendar3.svg" alt="" /><div><h2>@(Model.PendingBookings > 0 ? $"{Model.PendingBookings} appointment requests need review" : "Your appointment requests are up to date")</h2><p>Review requests, manage your schedule, and keep everyone informed.</p></div><a class="btn btn-outline-secondary" href="/Appointments">Manage appointments</a></section>
+    <div class="dashboard-columns">
+        <section class="panel"><div class="panel-heading"><h2>@(trainer ? "Client management" : "Workspace management")</h2></div>
+            <a class="quick-link" href="@(trainer ? "/Trainer/Clients" : "/Admin/Users")"><img src="~/lib/admin-icons/people-fill.svg" alt="" /><div><strong>@(trainer ? "Your clients" : "People and accounts")</strong><small>@(trainer ? "Review profiles, progress and feedback" : "Manage clients, trainers and account access")</small></div><img class="action-arrow" src="~/lib/admin-icons/chevron-right.svg" alt="" /></a>
+            <a class="quick-link" href="@(trainer ? "/Plans" : "/Admin/Assignments")"><img src="~/lib/admin-icons/@(trainer ? "clipboard2-check" : "arrow-left-right").svg" alt="" /><div><strong>@(trainer ? "Workout and nutrition plans" : "Trainer assignments")</strong><small>@(trainer ? "Create, publish and manage client plans" : "Connect each client with the right trainer")</small></div><img class="action-arrow" src="~/lib/admin-icons/chevron-right.svg" alt="" /></a>
+            <a class="quick-link" href="@(trainer ? "/Progress" : "/Admin/Reports")"><img src="~/lib/admin-icons/graph-up.svg" alt="" /><div><strong>Analytics and reports</strong><small>@(trainer ? "Explore your clients' recorded progress" : "Monitor aggregate activity and audit events")</small></div><img class="action-arrow" src="~/lib/admin-icons/chevron-right.svg" alt="" /></a>
+        </section>
+        <section class="panel"><div class="panel-heading"><h2>Workspace tools</h2></div>
+            @if (!trainer) { <a class="quick-link" href="/Admin/Professionals"><img src="~/lib/admin-icons/person-badge.svg" alt="" /><div><strong>Healthcare professionals</strong><small>Manage providers and specialties</small></div><img class="action-arrow" src="~/lib/admin-icons/chevron-right.svg" alt="" /></a> }
+            <a class="quick-link" href="/Notifications"><img src="~/lib/admin-icons/bell.svg" alt="" /><div><strong>Notifications</strong><small>@Model.Unread unread updates</small></div><img class="action-arrow" src="~/lib/admin-icons/chevron-right.svg" alt="" /></a>
+            <a class="quick-link" href="/Account/Profile"><img src="~/lib/admin-icons/gear.svg" alt="" /><div><strong>Settings</strong><small>Profile, timezone and preferences</small></div><img class="action-arrow" src="~/lib/admin-icons/chevron-right.svg" alt="" /></a>
+        </section>
+    </div>
+}
+<section class="panel"><div class="panel-heading"><h2>Upcoming appointments</h2><a href="/Appointments">View all</a></div>
+    @if (Model.Upcoming.Count == 0) { <div class="empty compact"><p>No upcoming appointments.</p>@if (client) { <a class="btn btn-outline-secondary" href="/Appointments/Create">Book an appointment</a> }</div> }
+    else { <div class="table-responsive"><table><thead><tr><th>@(client ? "Provider" : "Client")</th><th>Date and time · @Model.Profile.TimeZoneId</th><th>Status</th><th><span class="visually-hidden">Actions</span></th></tr></thead><tbody>@foreach (var row in Model.Upcoming) { <tr><td><strong>@(client ? row.Provider : row.Client)</strong></td><td>@Display.Local(row.Appointment.StartsAtUtc, Model.Profile.TimeZoneId)</td><td><span class="status status-@row.Appointment.Status.ToString().ToLowerInvariant()">@row.Appointment.Status</span></td><td><a href="/Appointments">View</a></td></tr> }</tbody></table></div> }
+</section>
+
+@if (Model.Insights != null) { <partial name="_AdminInsights" model="Model.Insights" /> <a class="btn btn-outline-secondary" href="/Admin/Reports">View all reports and trainers</a> }

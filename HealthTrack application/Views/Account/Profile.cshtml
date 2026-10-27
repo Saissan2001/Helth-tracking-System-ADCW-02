@@ -1,0 +1,11 @@
+@model ProfileInput
+@{ ViewData["Title"] = "Your profile"; }
+<div class="page-heading"><div><span class="eyebrow">ACCOUNT SETTINGS</span><h1>Your profile</h1><p>Your details, your time zone, your reminders.</p></div><a class="btn btn-outline-secondary" asp-action="Password">Change password</a></div>
+<section class="panel form-panel"><form method="post">
+<label asp-for="DisplayName">Display name</label><input field-feedback asp-for="DisplayName" />
+<label asp-for="Bio">About you <span class="muted">(optional)</span></label><textarea field-feedback asp-for="Bio" rows="3"></textarea>
+<label asp-for="TimeZoneId">Time zone</label><input field-feedback asp-for="TimeZoneId" list="zones" /><datalist id="zones"><option value="Asia/Colombo"></option><option value="Europe/London"></option><option value="America/New_York"></option><option value="UTC"></option></datalist>
+<h2 class="section-title">In-app reminders</h2><p class="muted">Notifications appear in your inbox. No email or SMS is sent.</p>
+<label class="check"><input field-feedback asp-for="WorkoutReminders" /> Workout schedule</label><label class="check"><input field-feedback asp-for="MealReminders" /> Meal schedule</label><label class="check"><input field-feedback asp-for="AppointmentReminders" /> Confirmed appointments</label>
+<label asp-for="ReminderMinutes">Minutes before an appointment</label><input field-feedback asp-for="ReminderMinutes" type="number" min="0" max="1440" />
+<button class="btn btn-primary">Save preferences</button></form></section>

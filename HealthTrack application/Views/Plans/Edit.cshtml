@@ -1,0 +1,6 @@
+@model PlanInput
+@{ ViewData["Title"] = Model.Id.HasValue ? "Edit plan draft" : "Create a plan"; }
+<div class="page-heading"><div><span class="eyebrow">PERSONALIZED SUPPORT</span><h1>@ViewData["Title"]</h1><p>Start with the details. Add exercises or meals on the next screen.</p></div></div>
+<section class="panel form-panel"><form method="post"><input asp-for="Id" type="hidden" /><input asp-for="Version" type="hidden" /><input asp-for="ClientId" type="hidden" />
+@if (Model.Id.HasValue) { <input asp-for="Kind" type="hidden" /> } else { <label asp-for="Kind">Plan type</label><select field-feedback asp-for="Kind" asp-items="Html.GetEnumSelectList<PlanKind>()"></select> }
+<label asp-for="Title">Plan title</label><input field-feedback asp-for="Title" placeholder="A steady start" /><label asp-for="Instructions">Guidance and instructions</label><textarea field-feedback asp-for="Instructions" rows="4"></textarea><div class="form-grid"><div><label asp-for="StartDate">Start date</label><input field-feedback asp-for="StartDate" type="date" /></div><div><label asp-for="EndDate">End date</label><input field-feedback asp-for="EndDate" type="date" /></div></div><button class="btn btn-primary">Save draft & build schedule →</button></form></section>

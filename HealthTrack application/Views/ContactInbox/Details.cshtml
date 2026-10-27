@@ -1,0 +1,8 @@
+@model ContactMessage
+@{ ViewData["Title"] = "Contact enquiry"; var replyLink = "mailto:" + Uri.EscapeDataString(Model.Email) + "?subject=" + Uri.EscapeDataString("Re: " + Model.Subject); }
+<div class="page-heading"><div><h1>Contact enquiry</h1><p>Received @Display.Local(Model.CreatedAtUtc, (string)ViewData["Zone"]!)</p></div><a class="btn btn-secondary" asp-action="Index">Back to inbox</a></div>
+<section class="panel contact-message-panel"><div class="panel-heading"><h2>@Model.Subject</h2><span class="status">@(Model.HandledAtUtc == null ? "New" : "Handled")</span></div><p><strong>@Model.Name</strong><br />@Model.Email</p><div class="contact-message-body">@Model.Message</div>
+    <div class="actions"><a class="btn btn-primary" href="@replyLink">Reply by email</a><form method="post" asp-action="Handle"><input type="hidden" name="id" value="@Model.Id" /><input type="hidden" name="version" value="@Display.Version(Model)" /><input type="hidden" name="handled" value="@(Model.HandledAtUtc == null ? "true" : "false")" /><button type="submit" class="btn btn-secondary">@(Model.HandledAtUtc == null ? "Mark as handled" : "Reopen enquiry")</button></form></div>
+    <p class="small muted">Reply by email opens your mail application. HealthTrack does not send the reply automatically. Mark the enquiry as handled after following up.</p>
+    @if (Model.HandledAtUtc.HasValue) { <p class="small muted">Handled @Display.Local(Model.HandledAtUtc.Value, (string)ViewData["Zone"]!)</p> }
+</section>

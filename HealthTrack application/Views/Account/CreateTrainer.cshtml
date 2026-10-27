@@ -1,0 +1,10 @@
+@model RegisterInput
+@{ var trainer = Context.Request.Path.Value!.Contains("CreateTrainer"); ViewData["Title"] = trainer ? "Create a trainer" : "Start your journey"; }
+<section class="panel form-panel"><span class="eyebrow">@(trainer ? "TEAM MANAGEMENT" : "WELCOME TO HEALTHTRACK")</span><h1>@ViewData["Title"]</h1><p class="muted">@(trainer ? "Create an account for a trainer and share the initial password privately." : "Create your client account. Your health information stays in your own space.")</p>
+<form method="post">
+<label asp-for="DisplayName">Full name</label><input field-feedback asp-for="DisplayName" autocomplete="name" />
+<label asp-for="Email">Email address</label><input field-feedback asp-for="Email" autocomplete="email" />
+<label asp-for="Password"></label><input field-feedback asp-for="Password" autocomplete="new-password" /><small>At least 10 characters, including uppercase, lowercase, a number and a symbol.</small>
+<label asp-for="ConfirmPassword">Confirm password</label><input field-feedback asp-for="ConfirmPassword" autocomplete="new-password" />
+<button class="btn btn-primary full">@(trainer ? "Create trainer" : "Create my account")</button></form>
+@if (!trainer) { <p class="auth-foot">Already have an account? <a asp-action="Login">Sign in</a></p> }</section>

@@ -1,0 +1,7 @@
+@model (int Number, int Pages)
+@{ var query = Context.Request.Query.ToDictionary(x => x.Key, x => (string?)x.Value.ToString()); }
+<nav class="pager" aria-label="Pagination">
+    @if (Model.Number > 1) { query["page"] = (Model.Number - 1).ToString(); <a class="btn btn-outline-secondary" href="@Microsoft.AspNetCore.WebUtilities.QueryHelpers.AddQueryString(Context.Request.Path, query)">Previous</a> }
+    <span>Page @Model.Number of @Model.Pages</span>
+    @if (Model.Number < Model.Pages) { query["page"] = (Model.Number + 1).ToString(); <a class="btn btn-outline-secondary" href="@Microsoft.AspNetCore.WebUtilities.QueryHelpers.AddQueryString(Context.Request.Path, query)">Next</a> }
+</nav>

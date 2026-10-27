@@ -1,0 +1,21 @@
+@model LoginInput
+@{ Layout = "_AuthLayout"; ViewData["Title"] = "Sign in"; }
+<h1>Welcome back!</h1>
+<p class="auth-intro">Sign in to your personal health dashboard and<br class="auth-desktop-break" /> keep your progress moving forward.</p>
+<form method="post" class="auth-form" aria-label="Sign in">
+    
+    <input asp-for="ReturnUrl" type="hidden" />
+    <div class="auth-field">
+        <label asp-for="Email">Email</label>
+        <div class="auth-input-wrap"><img class="auth-input-icon" src="~/lib/auth-icons/envelope.svg" alt="" /><input asp-for="Email" autocomplete="username" placeholder="Enter your email" aria-describedby="email-error" /></div>
+        <span asp-validation-for="Email" id="email-error"></span>
+    </div>
+    <div class="auth-field">
+        <label asp-for="Password">Password</label>
+        <div class="auth-input-wrap"><img class="auth-input-icon" src="~/lib/auth-icons/lock.svg" alt="" /><input asp-for="Password" autocomplete="current-password" placeholder="Enter your password" aria-describedby="password-error" /><button type="button" class="password-toggle" data-password-toggle="Password" aria-controls="Password" aria-label="Show password" aria-pressed="false"><img src="~/lib/auth-icons/eye-slash.svg" alt="" /></button></div>
+        <span asp-validation-for="Password" id="password-error"></span>
+    </div>
+    <div class="auth-options"><label class="auth-check"><input asp-for="RememberMe" /> Remember me</label><a asp-action="ForgotPassword">Forgot password?</a></div>
+    <button class="auth-submit" type="submit">Sign in</button>
+</form>
+<p class="auth-switch">Don't have an account? <a asp-action="Register">Sign up</a></p>

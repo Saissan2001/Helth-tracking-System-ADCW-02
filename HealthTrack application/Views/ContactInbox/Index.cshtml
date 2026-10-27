@@ -1,0 +1,13 @@
+@model Page<ContactMessage>
+@{ ViewData["Title"] = "Contact inbox"; var handled = (bool?)ViewData["Handled"]; }
+<div class="page-heading"><div><h1>Contact inbox</h1><p>Enquiries sent through the public contact form. Only administrators can access these messages.</p></div></div>
+<section class="panel">
+    <form method="get" class="filters"><div><label for="handled">Status</label><select field-feedback id="handled" name="handled"><option value="" selected="@(handled == null)">All enquiries</option><option value="false" selected="@(handled == false)">New</option><option value="true" selected="@(handled == true)">Handled</option></select></div><button class="btn btn-secondary" type="submit">Filter</button></form>
+    @if (Model.Items.Count == 0) { <div class="empty"><h2>No enquiries here yet.</h2><p>Messages from the contact page will appear here.</p></div> }
+    else {
+        <div class="table-responsive"><table><thead><tr><th>Subject</th><th>From</th><th>Received</th><th>Status</th><th>Action</th></tr></thead><tbody>
+        @foreach (var item in Model.Items) { <tr><td>@item.Subject</td><td>@item.Name</td><td>@Display.Local(item.CreatedAtUtc, (string)ViewData["Zone"]!)</td><td><span class="status">@(item.HandledAtUtc == null ? "New" : "Handled")</span></td><td><a asp-action="Details" asp-route-id="@item.Id">Open message</a></td></tr> }
+        </tbody></table></div>
+    }
+    <partial name="_Pager" model="@((Model.Number, Model.Pages))" />
+</section>

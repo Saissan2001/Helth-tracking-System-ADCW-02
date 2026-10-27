@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] · HealthTrack</title>
+    <link rel="preload" href="~/fonts/Manrope-variable.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/feedback.css" asp-append-version="true" />
+</head>
+<body class="auth-page">
+    <a class="auth-skip" href="#main">Skip to form</a>
+    <main id="main" class="auth-shell">
+        <section class="auth-left">
+            <a class="auth-brand" href="/" aria-label="HealthTrack home">
+                <span class="auth-brand-icon"><img src="~/lib/auth-icons/heart-pulse.svg" width="23" height="23" alt="" /></span>
+                <span>HealthTrack</span>
+            </a>
+            <div class="auth-content">
+
+                @RenderBody()
+            </div>
+        </section>
+        <aside class="auth-photo" aria-label="Wellness inspiration">
+            <img src="~/img/auth-wellness.png" alt="A woman stretching outdoors beside a peaceful lake in the morning light" width="1024" height="1536" fetchpriority="high" />
+        </aside>
+    </main>
+    <script src="~/js/auth.js" asp-append-version="true"></script>
+<partial name="_Toasts" />
+<script src="~/js/feedback.js" asp-append-version="true"></script>
+</body>
+</html>

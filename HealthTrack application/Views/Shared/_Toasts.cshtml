@@ -1,0 +1,21 @@
+@{
+    var messages = new List<(string Type, string Text)>();
+    foreach (var key in new[] { "Success", "ContactSuccess", "Error", "Info" })
+    {
+        if (TempData[key] is string text && !string.IsNullOrWhiteSpace(text))
+            messages.Add((key == "Error" ? "error" : key == "Info" ? "info" : "success", text));
+    }
+    if (ViewData.ModelState.TryGetValue("", out var general))
+        foreach (var error in general.Errors)
+            messages.Add(("error", string.IsNullOrWhiteSpace(error.ErrorMessage) ? "Unable to complete this action. Please try again." : error.ErrorMessage));
+}
+<div class="toast-region" aria-label="Notifications">
+    @foreach (var message in messages.Distinct())
+    {
+        <div class="app-toast toast-@message.Type" role="@(message.Type == "error" ? "alert" : "status")" aria-atomic="true" data-toast="@message.Type">
+            <img class="toast-icon" src="~/lib/admin-icons/@(message.Type == "success" ? "check-circle" : "bell").svg" alt="" width="22" height="22" />
+            <div><strong>@(message.Type == "success" ? "Success" : message.Type == "error" ? "Action needed" : "Information")</strong><p>@message.Text</p></div>
+            <button type="button" class="toast-close" aria-label="Dismiss notification" hidden><img src="~/lib/admin-icons/x-lg.svg" width="16" height="16" alt="" /></button>
+        </div>
+    }
+</div>

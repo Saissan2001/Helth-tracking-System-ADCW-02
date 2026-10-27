@@ -1,0 +1,32 @@
+@model ContactInput
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@{
+    Layout = "_HomeLayout"; ViewData["Title"] = "Contact us";
+    var email = Configuration["PublicContact:Email"];
+    var hasEmail = System.Net.Mail.MailAddress.TryCreate(email, out var supportAddress);
+    var phone = Configuration["PublicContact:Phone"];
+    var organization = Configuration["PublicContact:Organization"];
+}
+<section class="public-page-hero"><span class="section-kicker">LET'S KEEP YOU MOVING</span><h1>We're here<br />to help.</h1><p>Find the right next step for your account, your training, or a question about your information.</p></section>
+<section class="contact-grid public-section"><article class="contact-main"><span class="section-kicker">CONTACT US</span><h2>Start a conversation.</h2>@if (!string.IsNullOrWhiteSpace(organization)) { <p class="contact-organization">@organization</p> }
+@if (hasEmail) { <span class="contact-label">Email support</span><a class="contact-address" href="mailto:@Uri.EscapeDataString(supportAddress!.Address)">@supportAddress.Address</a><p>Email us directly or use the form below. Include a short description of the issue and the page you were using.</p> } else { <p>Have a question about HealthTrack? Send a message using the form below. Your enquiry will be saved for the team managing this installation.</p><a class="text-link" href="#contact-form">Send us a message →</a> }
+@if (!string.IsNullOrWhiteSpace(phone)) { <span class="contact-label">Phone</span><p class="contact-phone">@phone</p> }
+<div class="contact-note"><img src="~/lib/admin-icons/shield-check.svg" alt="" /><p>Please don't include passwords, reset links or sensitive health records in a support enquiry.</p></div></article>
+<div class="contact-options"><a class="contact-option" href="/Account/ForgotPassword"><img src="~/lib/admin-icons/person-badge.svg" alt="" /><div><h3>Having trouble signing in?</h3><p>Open account recovery to see the available next step.</p></div><img src="~/lib/admin-icons/chevron-right.svg" alt="" /></a><a class="contact-option" href="/Appointments"><img src="~/lib/admin-icons/calendar3.svg" alt="" /><div><h3>Talk with your trainer</h3><p>Sign in to manage appointments and arrange a check-in.</p></div><img src="~/lib/admin-icons/chevron-right.svg" alt="" /></a><a class="contact-option" href="/Home/Privacy"><img src="~/lib/admin-icons/shield-check.svg" alt="" /><div><h3>Questions about your data?</h3><p>Read what is stored, who can access it, and your choices.</p></div><img src="~/lib/admin-icons/chevron-right.svg" alt="" /></a></div></section>
+<section class="public-section contact-form-section" id="contact-form" aria-labelledby="contact-form-title">
+    <div class="contact-form-intro"><span class="section-kicker">LET'S TALK</span><h2 id="contact-form-title" class="public-section-title">Send us a message.</h2><p>Tell us how we can help. Leave an email address where the team can reach you.</p><p class="contact-form-note">Please keep passwords, reset links and sensitive health information out of your message.</p></div>
+    <div class="contact-form-card">
+        <form method="post" asp-action="Contact" asp-controller="Home" class="contact-form">
+            
+            <div class="contact-form-fields">
+                <div><label asp-for="Name"></label><input asp-for="Name" autocomplete="name" maxlength="100" required placeholder="Your full name" /><span asp-validation-for="Name"></span></div>
+                <div><label asp-for="Email"></label><input asp-for="Email" type="email" autocomplete="email" maxlength="256" required placeholder="you@example.com" /><span asp-validation-for="Email"></span></div>
+            </div>
+            <div><label asp-for="Subject"></label><input asp-for="Subject" maxlength="150" minlength="3" required placeholder="What would you like help with?" /><span asp-validation-for="Subject"></span></div>
+            <div><label asp-for="Message"></label><textarea asp-for="Message" rows="6" maxlength="4000" minlength="10" required aria-describedby="message-hint" placeholder="Share a few details about your question…"></textarea><span asp-validation-for="Message"></span><span id="message-hint" class="contact-field-hint">10–4,000 characters. All fields are required.</span></div>
+            <p class="contact-form-note">Your name, email and message are stored for administrators to review and follow up. See our <a href="/Home/Privacy">privacy policy</a>.</p>
+            <button class="orange-button" type="submit">Send message<img src="~/lib/admin-icons/arrow-up-right.svg" alt="" /></button>
+        </form>
+    </div>
+</section>
+<section class="public-section contact-faq"><h2 class="public-section-title">A few helpful answers.</h2><details><summary>How do I update my details or reminders?</summary><p>Sign in and open Settings. You can change your display name, profile information, timezone and reminder preferences.</p></details><details><summary>Can I correct a workout, meal or measurement?</summary><p>Yes. Open the relevant log in your account and use its edit or delete action. Your currently assigned trainer can view your progress but cannot change your own log entries.</p></details><details><summary>How do I request an account export or deletion?</summary><p>Use the contact form to reach the operator who provided access to this installation. Automated account export and erasure are not available. You can delete individual health logs through your account.</p></details><details><summary>Is this a medical or emergency service?</summary><p>No. HealthTrack supports fitness tracking and appointment coordination. For medical concerns, contact a qualified healthcare professional; for an emergency, use your local emergency service.</p></details></section>

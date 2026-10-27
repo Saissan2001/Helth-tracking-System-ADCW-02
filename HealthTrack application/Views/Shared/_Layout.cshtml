@@ -1,0 +1,64 @@
+@using System.Security.Claims
+@inject IHealthService Health
+@{
+    var signedIn = User.Identity?.IsAuthenticated == true;
+    var role = User.FindFirstValue(ClaimTypes.Role) ?? "";
+    var name = User.Identity?.Name ?? "";
+    var unread = 0;
+    if (signedIn) { try { var actor = new Actor(User.FindFirstValue(ClaimTypes.NameIdentifier)!, role); name = (await Health.Profile(actor)).DisplayName; unread = await Health.UnreadCount(actor); } catch { } }
+    var links = new List<(string Label, string Url, string Icon)> { ("Home", "/Dashboard", "house-door-fill") };
+    if (role == Roles.Client) links.AddRange(new[] { ("Daily diary", "/Wellness", "calendar3"), ("Goals & preferences", "/Wellness/Settings", "gear"), ("Saved entries", "/Wellness/Library", "clipboard2-check"), ("Wellness trends", "/Wellness/Trends", "graph-up"), ("Workouts", "/Logs?kind=Workout", "activity"), ("Nutrition", "/Logs?kind=Meal", "basket2"), ("Measurements", "/Logs?kind=Measurement", "heart-pulse"), ("My plans", "/Plans", "clipboard2-check"), ("Analytics", "/Progress", "graph-up") });
+    if (role == Roles.Trainer) links.AddRange(new[] { ("Clients", "/Trainer/Clients", "people-fill"), ("Plans", "/Plans", "clipboard2-check"), ("Analytics", "/Progress", "graph-up") });
+    if (role == Roles.Administrator) links.AddRange(new[] { ("People", "/Admin/Users", "people-fill"), ("Assignments", "/Admin/Assignments", "arrow-left-right"), ("Professionals", "/Admin/Professionals", "person-badge"), ("Analytics & audit", "/Admin/Reports", "graph-up") });
+    if (role != Roles.Client) links.Add(("Performance reports", "/Reports", "graph-up"));
+    if (role == Roles.Administrator) links.Add(("Contact inbox", "/ContactInbox", "bell"));
+    links.Add(("Appointments", "/Appointments", "calendar3"));
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] · HealthTrack</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @if (signedIn) { <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" /> }
+    <link rel="stylesheet" href="~/css/wellness.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/feedback.css" asp-append-version="true" />
+</head>
+<body class="@(signedIn ? "app-body admin-shell" : "public-body")">
+<a class="skip-link" href="#main">Skip to content</a>
+@if (signedIn) {
+    <aside class="sidebar" id="sidebar" aria-label="Workspace navigation">
+        <div class="sidebar-brand-row"><a class="brand" href="/Dashboard" aria-label="HealthTrack home"><img src="~/lib/admin-icons/heart-pulse.svg" alt="" /><span class="nav-label">HealthTrack</span></a><button class="sidebar-collapse icon-button" type="button" aria-label="Collapse sidebar" aria-controls="sidebar" aria-expanded="true"><img src="~/lib/admin-icons/list.svg" alt="" /></button></div>
+        <button class="nav-search" type="button" data-open-search aria-label="Search pages"><img src="~/lib/admin-icons/search.svg" alt="" /><span class="nav-label">Search</span><kbd class="nav-label">Ctrl K</kbd></button>
+        <nav aria-label="Main navigation">
+            @foreach (var link in links) { <a href="@link.Url" title="@link.Label"><img src="~/lib/admin-icons/@(link.Icon).svg" alt="" /><span class="nav-label">@link.Label</span></a> }
+            <a href="/Notifications" title="Notifications"><img src="~/lib/admin-icons/bell.svg" alt="" /><span class="nav-label">Notifications</span>@if (unread > 0) { <span class="nav-count">@unread</span> }</a>
+        </nav>
+        <div class="sidebar-context nav-label"><span>Workspace</span><div><img src="~/lib/admin-icons/shield-check.svg" alt="" />@role</div></div>
+        <div class="sidebar-bottom">
+            <a class="settings-link" href="/Account/Profile" title="Settings"><img src="~/lib/admin-icons/gear.svg" alt="" /><span class="nav-label">Settings</span></a>
+            <details class="account-menu"><summary title="Account menu"><span class="account-avatar">@(name.Length > 0 ? name[..1].ToUpper() : "H")</span><span class="nav-label account-name">@name</span><img class="nav-label" src="~/lib/admin-icons/chevron-down.svg" alt="" /></summary><div class="account-popover"><strong>@name</strong><small>@role account</small><a href="/Account/Profile">Manage profile</a><a href="/Account/Password">Change password</a><form method="post" action="/Account/Logout">@Html.AntiForgeryToken()<button type="submit">Sign out</button></form></div></details>
+        </div>
+    </aside>
+    <button class="sidebar-backdrop" aria-label="Close navigation" type="button" hidden></button>
+    <dialog class="page-search" aria-labelledby="page-search-title"><div class="search-dialog-heading"><h2 id="page-search-title">Search HealthTrack</h2><button type="button" class="icon-button" data-close-search aria-label="Close search"><img src="~/lib/admin-icons/x-lg.svg" alt="" /></button></div><label for="page-search-input" class="visually-hidden">Search pages</label><input id="page-search-input" type="search" placeholder="Search pages and actions…" autocomplete="off" /><p class="search-caption">Pages in your workspace</p><div class="search-results">@foreach (var link in links) { <a href="@link.Url"><img src="~/lib/admin-icons/@(link.Icon).svg" alt="" /><span>@link.Label</span><img src="~/lib/admin-icons/chevron-right.svg" alt="" /></a> }<a href="/Notifications"><img src="~/lib/admin-icons/bell.svg" alt="" /><span>Notifications</span></a><a href="/Account/Profile"><img src="~/lib/admin-icons/gear.svg" alt="" /><span>Settings and profile</span></a></div><p class="search-empty" hidden role="status">No matching pages. Try another name.</p><small class="search-caption">Search navigation pages. Your health records are not searched.</small></dialog>
+}
+<div class="workspace">
+    <header class="topbar">
+        @if (signedIn) { <button class="mobile-toggle icon-button" type="button" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false"><img src="~/lib/admin-icons/list.svg" alt="" /></button><div class="breadcrumb-label"><a href="/Dashboard">HealthTrack</a><span>/</span>@ViewData["Title"]</div><a class="workspace-account" href="/Account/Profile">@role workspace<img src="~/lib/admin-icons/arrow-up-right.svg" alt="" /></a> }
+        else { <a class="brand" href="/"><span class="brand-icon">✚</span> HealthTrack<span class="brand-dot">.</span></a><nav class="public-nav"><a href="/Home/Privacy">Privacy</a><a href="/Account/Login">Sign in</a><a class="btn btn-primary" href="/Account/Register">Get started →</a></nav> }
+    </header>
+    <main id="main" class="main-content">
+
+        @RenderBody()
+    </main>
+    <footer class="footer"><span>HealthTrack</span><a href="/Home/About">About</a><a href="/Home/Contact">Contact us</a><a href="/Home/Privacy">Privacy policy</a><a href="/Home/Terms">Terms & conditions</a></footer>
+</div>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script><script src="~/lib/chartjs/chart.umd.min.js"></script><script src="~/js/site.js" asp-append-version="true"></script>
+@if (signedIn) { <script src="~/js/admin.js" asp-append-version="true"></script> }
+@await RenderSectionAsync("Scripts", required: false)
+<partial name="_Toasts" />
+<script src="~/js/wellness.js" asp-append-version="true"></script>
+<script src="~/js/feedback.js" asp-append-version="true"></script>
+</body></html>

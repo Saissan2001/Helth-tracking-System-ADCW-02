@@ -1,0 +1,30 @@
+@model RegisterInput
+@{ Layout = "_AuthLayout"; ViewData["Title"] = "Create an account"; }
+<h1>Create your account</h1>
+<p class="auth-intro">A healthier routine starts with you.<br />Join HealthTrack and take your first step.</p>
+<form method="post" class="auth-form auth-register" aria-label="Create a client account">
+    
+    <div class="auth-field">
+        <label asp-for="DisplayName">Full name</label>
+        <div class="auth-input-wrap"><img class="auth-input-icon" src="~/lib/auth-icons/person.svg" alt="" /><input asp-for="DisplayName" autocomplete="name" placeholder="Enter your full name" aria-describedby="name-error" /></div>
+        <span asp-validation-for="DisplayName" id="name-error"></span>
+    </div>
+    <div class="auth-field">
+        <label asp-for="Email">Email</label>
+        <div class="auth-input-wrap"><img class="auth-input-icon" src="~/lib/auth-icons/envelope.svg" alt="" /><input asp-for="Email" autocomplete="email" placeholder="Enter your email" aria-describedby="email-error" /></div>
+        <span asp-validation-for="Email" id="email-error"></span>
+    </div>
+    <div class="auth-field">
+        <label asp-for="Password">Password</label>
+        <div class="auth-input-wrap"><img class="auth-input-icon" src="~/lib/auth-icons/lock.svg" alt="" /><input asp-for="Password" autocomplete="new-password" placeholder="Create a password" aria-describedby="password-hint password-error" /><button type="button" class="password-toggle" data-password-toggle="Password" aria-controls="Password" aria-label="Show password" aria-pressed="false"><img src="~/lib/auth-icons/eye-slash.svg" alt="" /></button></div>
+        <small class="auth-hint" id="password-hint">Use 10+ characters with uppercase, lowercase, a number and a symbol.</small>
+        <span asp-validation-for="Password" id="password-error"></span>
+    </div>
+    <div class="auth-field">
+        <label asp-for="ConfirmPassword">Confirm password</label>
+        <div class="auth-input-wrap"><img class="auth-input-icon" src="~/lib/auth-icons/lock.svg" alt="" /><input asp-for="ConfirmPassword" autocomplete="new-password" placeholder="Re-enter your password" aria-describedby="confirm-error" /><button type="button" class="password-toggle" data-password-toggle="ConfirmPassword" aria-controls="ConfirmPassword" aria-label="Show password" aria-pressed="false"><img src="~/lib/auth-icons/eye-slash.svg" alt="" /></button></div>
+        <span asp-validation-for="ConfirmPassword" id="confirm-error"></span>
+    </div>
+    <button class="auth-submit" type="submit">Create account</button>
+</form>
+<p class="auth-switch">Already have an account? <a asp-action="Login">Sign in</a></p>

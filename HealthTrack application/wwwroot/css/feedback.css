@@ -1,0 +1,22 @@
+/* Shared field feedback and notifications across public, auth and workspace pages. */
+.validation-summary-valid,
+.validation[hidden], .auth-validation[hidden], .contact-validation[hidden],
+[data-valmsg-summary][hidden] { display: none !important; }
+.field-validation-error { display: block; width: 100%; margin: 7px 0 14px; color: #a13225; font-size: 14px; line-height: 1.6; font-weight: 500; }
+.field-validation-valid { display: none; }
+input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: #a13225 !important; }
+.toast-region { position: fixed; top: 24px; right: 24px; z-index: 1200; width: min(440px, calc(100vw - 32px)); display: grid; gap: 12px; pointer-events: none; max-height: calc(100dvh - 48px); overflow-y: auto; padding: 4px; }
+.app-toast { display: grid; grid-template-columns: 22px minmax(0,1fr) 36px; gap: 12px; align-items: start; padding: 18px 12px 18px 18px; border: 1px solid #b7cfc4; border-left: 4px solid #28704b; border-radius: 12px; background: #f7fcf9; color: #193e2b; box-shadow: 0 8px 28px #16232924; pointer-events: auto; font-family: inherit; }
+.app-toast.toast-error { color: #72251c; background: #fff8f5; border-color: #e5b8ae; border-left-color: #ac3b2c; }
+.app-toast.toast-info { color: #263f58; background: #f7faff; border-color: #b9c9dc; border-left-color: #426a94; }
+.app-toast .toast-icon { width: 22px; height: 22px; margin-top: 2px; }
+.app-toast strong { display: block; font-size: 16px; line-height: 1.5; font-weight: 700; letter-spacing: 0; }
+.app-toast p { margin: 4px 0 0; font-size: 14px; line-height: 1.7; color: inherit; overflow-wrap: anywhere; }
+.app-toast .toast-close { width: 36px; min-height: 44px; margin: -7px 0 0; padding: 10px; border: 0; border-radius: 6px; background: transparent; cursor: pointer; display: grid; place-items: center; color: inherit; }
+.app-toast .toast-close[hidden] { display: none; }
+.toast-close img { width: 16px; height: 16px; }
+.app-toast .toast-close:hover { background: #1623290c; }
+.app-toast .toast-close:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }
+@keyframes toast-enter { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@media(prefers-reduced-motion:no-preference) { .app-toast { animation: toast-enter 200ms ease-out; } }
+@media(max-width:600px) { .toast-region { top: 12px; right: 12px; width: calc(100vw - 24px); max-height: calc(100dvh - 24px); } }

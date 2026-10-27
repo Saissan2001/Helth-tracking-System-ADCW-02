@@ -1,0 +1,7 @@
+<form method="get" class="filters">
+    @if (Context.Request.Query.ContainsKey("clientId")) { <input type="hidden" name="clientId" value="@Context.Request.Query["clientId"]" /> }
+    @if (ViewData["Kind"] != null) { <input type="hidden" name="kind" value="@ViewData["Kind"]" /> }
+    <div><label for="from">From</label><input field-feedback id="from" name="from" type="date" value="@(((DateOnly?)ViewData["From"])?.ToString("yyyy-MM-dd"))" required /></div>
+    <div><label for="to">To</label><input field-feedback id="to" name="to" type="date" value="@(((DateOnly?)ViewData["To"])?.ToString("yyyy-MM-dd"))" required /></div>
+    <button class="btn btn-secondary">Apply dates</button><span class="muted">Up to one year</span>
+</form>

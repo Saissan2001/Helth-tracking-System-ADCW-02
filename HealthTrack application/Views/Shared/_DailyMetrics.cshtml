@@ -1,0 +1,23 @@
+@model DailyOverview
+@{
+    var p = Model.Preferences; var t = Model.Totals;
+    var diaryUrl = $"/Wellness?date={Model.Date:yyyy-MM-dd}";
+    string LogUrl(string kind) => Url.Action("Edit", "Logs", new { kind, date = Model.Date.ToString("yyyy-MM-dd"), returnUrl = diaryUrl })!;
+    var metrics = new List<(string Key, string Label, int? Value, int? Goal, string Unit, string Detail, string Url)> {
+        ("movement", "Movement this week", Model.WeekWorkoutMinutes, p.WeeklyWorkoutMinutes, "min", "Since Monday " + Model.WeekStart.ToString("dd MMM"), LogUrl("Workout"))
+    };
+    if (p.ShowWater) metrics.Add(("water", "Water", t.WaterMl, p.DailyWaterMl, "ml", "Water entries on this date", LogUrl("Hydration")));
+    if (p.ShowSleep) metrics.Add(("sleep", "Sleep", t.SleepMinutes, p.NightlySleepMinutes, "min", "Sessions ending on this date", LogUrl("Sleep")));
+    if (p.ShowSteps) metrics.Add(("steps", "Steps", t.Steps, p.DailySteps, "steps", "Latest daily total; readings are not added", LogUrl("Measurement")));
+    var focus = p.Focus == WellnessFocus.Rest ? "sleep" : "movement";
+    metrics = metrics.OrderByDescending(x => x.Key == focus).ToList();
+}
+<div class="wellness-metrics focus-@p.Focus.ToString().ToLowerInvariant()">
+@foreach (var metric in metrics) {
+    <article class="wellness-metric metric-@metric.Key"><div class="metric-topline"><span>@metric.Label</span><a href="@metric.Url" aria-label="Log @metric.Label.ToLowerInvariant()">Log</a></div><strong>@(metric.Value?.ToString("N0") ?? "—") <span>@metric.Unit</span></strong>
+    @if (metric.Goal.HasValue) { <progress value="@(Math.Min(metric.Value ?? 0, metric.Goal.Value))" max="@metric.Goal" aria-label="@metric.Label progress toward your personal target"></progress><p>@(metric.Value.HasValue ? $"{metric.Value:N0} of {metric.Goal:N0} {metric.Unit}" : $"No data yet · target {metric.Goal:N0} {metric.Unit}")</p> }
+    else { <p>@(metric.Value.HasValue ? "Recorded total" : "Not recorded") · <a href="/Wellness/Settings">Set a personal target</a></p> }
+    <small>@metric.Detail</small></article>
+}
+@if (p.ShowNutrition) { <article class="wellness-metric metric-nutrition"><div class="metric-topline"><span>Nutrition</span><a href="@LogUrl("Meal")">Log meal</a></div><strong>@Display.Number(t.MealCalories) <span>kcal</span></strong><div class="macro-summary"><span>Protein <b>@Display.Number(t.Protein, " g")</b></span><span>Carbs <b>@Display.Number(t.Carbs, " g")</b></span><span>Fat <b>@Display.Number(t.Fat, " g")</b></span></div><small>Known meal amounts only.@if (t.MealsMissingCalories > 0) { <span> @t.MealsMissingCalories meal entries have no calories supplied.</span> }</small></article> }
+</div>

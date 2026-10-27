@@ -1,0 +1,14 @@
+@model AdherenceReport
+@{ ViewData["Title"] = "Plan progress"; var client = User.IsInRole(Roles.Client); }
+<div class="page-heading"><div><h1>Plan progress</h1><p>@Model.Plan.Title · @Model.TimeZoneId</p></div><a asp-action="Details" asp-route-id="@Model.Plan.Id">Back to plan</a></div>
+<section class="panel"><form method="get" class="form-grid"><input name="id" type="hidden" value="@Model.Plan.Id" /><div><label for="from">From</label><input field-feedback id="from" name="from" type="date" value="@Model.From.ToString("yyyy-MM-dd")" required /></div><div><label for="to">To</label><input field-feedback id="to" name="to" type="date" value="@Model.To.ToString("yyyy-MM-dd")" required /></div><div><button class="btn btn-primary">Apply dates</button></div></form><p class="muted">Choose up to 31 days. Completion uses linked entries and scheduled times in the client's current timezone. It measures recorded completion, not workout quality or medical outcomes.</p></section>
+<div class="stats-grid"><article class="stat"><label>Scheduled items due</label><strong>@Model.Due</strong></article><article class="stat"><label>Completed items due</label><strong>@Model.Completed</strong></article><article class="stat"><label>Completion</label><strong>@(Model.Percent?.ToString("0.#") + (Model.Percent.HasValue ? "%" : "—"))</strong><small>Future items are excluded</small></article></div>
+<section class="panel"><h2>Scheduled occurrences</h2>
+@if (Model.Occurrences.Count == 0) { <p>No scheduled items within this date range.</p> }
+else { <div class="table-responsive"><table><thead><tr><th>Date / time</th><th>Scheduled item</th><th>Status</th><th>Entry</th></tr></thead><tbody>
+@foreach (var row in Model.Occurrences) { <tr><td>@row.Date.ToString("dd MMM yyyy") · @row.Time.ToString("HH:mm")</td><td>@row.Description</td><td><span class="status">@(row.LogId.HasValue ? "Recorded" : row.Due ? "Not recorded" : "Upcoming")</span></td><td>
+@if (client && row.LogId.HasValue) { <a asp-controller="Logs" asp-action="Edit" asp-route-id="@row.LogId">Review entry</a> }
+else if (client && row.Due && Model.Plan.Status == PlanStatus.Published) { <a asp-controller="Logs" asp-action="Edit" asp-route-itemId="@row.ItemId" asp-route-date="@row.Date.ToString("yyyy-MM-dd")">Record completion</a> }
+else { <span>—</span> }
+</td></tr> }
+</tbody></table></div> }</section>
